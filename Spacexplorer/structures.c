@@ -1,21 +1,7 @@
-#include <structures.h>
+#include "structures.h"
+#include <stdio.h>
 
-typedef struct
-{
-    int x, y;
-}Coord;
-
-typedef struct
-{
-    char name[15];
-    Coord current_loc;
-    int hp;
-    int num_scrap;
-    int oxygen; // 100% - 0%
-
-}Player;
-
-typedef struct
-{
-    int has_scrap; // 1 means it has scrap, 0 means it doesn't
-}Cell;
+void print_player(const Player *p) {
+    printf("Player %s at (%d, %d) | HP: %d | Scrap: %d | Oxygen: %d%%\n",
+           p->name, p->current_loc.x, p->current_loc.y, p->hp, p->num_scrap, p->oxygen);
+}
