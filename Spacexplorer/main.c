@@ -6,8 +6,17 @@ The following commands need to be used in order to run:
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <time.h>
 #include "structures.h"
+#include "functions.h"
+
+char command[50];
+
+bool getInput(void){
+    printf("-> ");
+    return fgets(command, sizeof command, stdin) != NULL;
+}
 
 int main(){
     srand(time(NULL));
@@ -18,7 +27,7 @@ int main(){
     
     Cell cell[n][n];
 
-    printf("x: %d y: %d\n", player_info.current_loc.x, player_info.current_loc.y);
+    printf("Starting Co-ordinates: x: %d y: %d\n", player_info.current_loc.x, player_info.current_loc.y);
 
 
     printf(" ");
@@ -51,8 +60,14 @@ int main(){
     }
     printf("\n");
 
-    print_player(&player_info);
+    //print_player(&player_info);
 
+    int gameOver = 0;
+    while(executecommand(command, &player_info, cell) && getInput()){
+        system("cls");
+    }
+
+    system("cls");
 
     // Only exits when enter is pressed
     printf("Press Enter to exit...");
