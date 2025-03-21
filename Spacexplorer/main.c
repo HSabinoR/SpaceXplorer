@@ -14,15 +14,17 @@ The following commands need to be used in order to run:
 char command[50];
 
 bool getInput(void){
-    printf("-> ");
+    printf("\n-> ");
     return fgets(command, sizeof command, stdin) != NULL;
 }
+
+int n;
 
 int main(){
     srand(time(NULL));
 
-    int n = 18 + rand() % 6; // Random number between 18 and 24 determining grid size
-    
+    n = 18 + rand() % 6; // Random number between 18 and 24 determining grid size
+
     Player player_info = {"Henrique", {rand() % n, rand() % n}, 100, 0, 100}; // Starting conditions
     
     Cell cell[n][n];
@@ -36,16 +38,16 @@ int main(){
     }
     printf("\n");
 
-    for(int i = 0; i < n; i++){
+    for(int y = 0; y < n; y++){
         
         printf("|");
 
-        for(int j = 0; j < n; j++){ 
-            cell[i][j].has_scrap = 0;
-            cell[i][j].has_scrap = rand() % 2; // Randomly add scrap
+        for(int x = 0; x < n; x++){ 
+            cell[x][y].has_scrap = 0;
+            cell[x][y].has_scrap = rand() % 2; // Randomly add scrap
             
-            if (i == player_info.current_loc.x && j == player_info.current_loc.y){
-                printf(" [x] ");
+            if (x == player_info.current_loc.x && x == player_info.current_loc.y){
+                printf("  x  ");
             }else{
                 printf(" [0] ");
             }
@@ -60,9 +62,6 @@ int main(){
     }
     printf("\n");
 
-    //print_player(&player_info);
-
-    int gameOver = 0;
     while(executecommand(command, &player_info, cell) && getInput()){
         system("cls");
     }
