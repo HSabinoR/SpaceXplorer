@@ -9,7 +9,7 @@ extern Cell** cell;
 extern Player player_info;
 extern Coord asteroid;
 bool executecommand(char *input);
-void executeScan();
+void executeScan(char *noun);
 void executeFly(char *noun);
 void executeShow(char *noun);
 void executeCollect();

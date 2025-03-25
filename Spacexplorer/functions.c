@@ -6,19 +6,49 @@
 #include "structures.h"
 #include <time.h>
 
-void executeScan(){
-   //int gridSize = 3; // Fix issue for when gridSize is used
+
+void executeScan(char *noun){
+   /* // Made redudant with varying gridSize
    Coord scannable_cells[3][3] = {
       { {player_info.current_loc.x - 1, player_info.current_loc.y - 1}, {player_info.current_loc.x, player_info.current_loc.y - 1}, {player_info.current_loc.x + 1, player_info.current_loc.y - 1} },
       { {player_info.current_loc.x - 1, player_info.current_loc.y}, {player_info.current_loc.x, player_info.current_loc.y}, {player_info.current_loc.x + 1, player_info.current_loc.y} },
       { {player_info.current_loc.x - 1, player_info.current_loc.y + 1}, {player_info.current_loc.x, player_info.current_loc.y + 1}, {player_info.current_loc.x + 1, player_info.current_loc.y + 1} }
    };
+   */
+   
+   int gridSize = 3; // Default grid size
+   char *endptr;
 
-   for(int i = 0; i < 3; i++){
+   if (noun != NULL) {
+      // Convert the noun to a long integer
+      long num = strtol(noun, &endptr, 10);
+
+      // Check if the conversion is successful and the entire string is a number
+      if (*endptr == '\0' && num > 0 && num < 4) {
+         gridSize = (int) num * 2 + 1;
+      } // Allows gridSize up 7 
+      //printf("\nScanning range: %d\n", gridSize); Debugging
+   }
+
+   // Allocate memory for scannable_cells depending on gridSize
+   Coord** scannable_cells = malloc(gridSize * sizeof(Coord*));
+   for (int i = 0; i < gridSize; i++) {
+      scannable_cells[i] = malloc(gridSize * sizeof(Coord));
+   }
+
+   // Assign values to scannable_cells
+   for (int i = 0; i < gridSize; i++) {
+      for (int j = 0; j < gridSize; j++) {
+         scannable_cells[i][j].x = player_info.current_loc.x - (gridSize / 2) + j;
+         scannable_cells[i][j].y = player_info.current_loc.y - (gridSize / 2) + i;
+      }
+   }
+
+   for(int i = 0; i < gridSize; i++){
         
       printf("|");
 
-      for(int j = 0; j < 3; j++){ 
+      for(int j = 0; j < gridSize; j++){ 
          
          int x = scannable_cells[i][j].x;
          int y = scannable_cells[i][j].y;
@@ -26,9 +56,9 @@ void executeScan(){
          if (y < 0 || y >= n) {
             printf("-----"); // Out of bounds
          } else if(x >= n){
-            printf("  <  ");
+            printf("  <  "); // Out of bounds
          } else if(x < 0){
-            printf("  >  ");
+            printf("  >  "); // Out of bounds
          } else if (x == player_info.current_loc.x && y == player_info.current_loc.y) {
             printf("  x  "); // Player's position
          } else if (cell[x][y].has_scrap) {
@@ -47,6 +77,12 @@ void executeScan(){
    if (cell[x][y].has_scrap == 1){
       printf("\nThe cell you're on has some space junk!");
    }
+
+   // Free the allocated memory
+   for (int i = 0; i < gridSize; i++) {
+      free(scannable_cells[i]);
+   }
+   free(scannable_cells);
 }
 
 void executeFly(char *noun){
@@ -226,7 +262,7 @@ bool executecommand(char *input){
          return false;
       } else if (strcmp(verb, "scan") == 0) {
          printf("Scanning...\n");
-         executeScan();
+         executeScan(noun);
       } else if (strcmp(verb, "show") == 0) {
          executeShow(noun);
       } else if(strcmp(verb, "help") == 0){
