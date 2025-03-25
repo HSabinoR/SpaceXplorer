@@ -2,14 +2,16 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdlib.h>
 #include "structures.h"
+#include <time.h>
 
-void executeScan(Player *player, Cell (*cell)[n]){
-   
+void executeScan(){
+   //int gridSize = 3; // Fix issue for when gridSize is used
    Coord scannable_cells[3][3] = {
-      { {player->current_loc.x - 1, player->current_loc.y - 1}, {player->current_loc.x, player->current_loc.y - 1}, {player->current_loc.x + 1, player->current_loc.y - 1} },
-      { {player->current_loc.x - 1, player->current_loc.y}, {player->current_loc.x, player->current_loc.y}, {player->current_loc.x + 1, player->current_loc.y} },
-      { {player->current_loc.x - 1, player->current_loc.y + 1}, {player->current_loc.x, player->current_loc.y + 1}, {player->current_loc.x + 1, player->current_loc.y + 1} }
+      { {player_info.current_loc.x - 1, player_info.current_loc.y - 1}, {player_info.current_loc.x, player_info.current_loc.y - 1}, {player_info.current_loc.x + 1, player_info.current_loc.y - 1} },
+      { {player_info.current_loc.x - 1, player_info.current_loc.y}, {player_info.current_loc.x, player_info.current_loc.y}, {player_info.current_loc.x + 1, player_info.current_loc.y} },
+      { {player_info.current_loc.x - 1, player_info.current_loc.y + 1}, {player_info.current_loc.x, player_info.current_loc.y + 1}, {player_info.current_loc.x + 1, player_info.current_loc.y + 1} }
    };
 
    for(int i = 0; i < 3; i++){
@@ -23,51 +25,151 @@ void executeScan(Player *player, Cell (*cell)[n]){
 
          if (y < 0 || y >= n) {
             printf("-----"); // Out of bounds
-         } else if(x < 0 || x >= n){
+         } else if(x >= n){
             printf("  <  ");
-         } else if (x == player->current_loc.x && y == player->current_loc.y) {
+         } else if(x < 0){
+            printf("  >  ");
+         } else if (x == player_info.current_loc.x && y == player_info.current_loc.y) {
             printf("  x  "); // Player's position
          } else if (cell[x][y].has_scrap) {
             printf(" [#] "); // Scrap detected
-         } else {
+         } else if (x == asteroid.x && y == asteroid.y){
+            printf("  A  "); // Asteroid detected
+        } else {
             printf(" [0] "); // Empty cell
          }
       }
       printf("|\n");
    }
-   int x = player->current_loc.x;
-   int y = player->current_loc.y;
+   int x = player_info.current_loc.x;
+   int y = player_info.current_loc.y;
 
-   if (cell[y][x].has_scrap == 1){
+   if (cell[x][y].has_scrap == 1){
       printf("\nThe cell you're on has some space junk!");
    }
 }
 
-void executeFly(Player *p, char *noun){
+void executeFly(char *noun){
+   
+   // Scannable cells to detect the asteroid
+   Coord scannable_cells[7][7] = {
+      { {player_info.current_loc.x - 3, player_info.current_loc.y - 3}, {player_info.current_loc.x - 2, player_info.current_loc.y - 3}, {player_info.current_loc.x - 1, player_info.current_loc.y - 3}, {player_info.current_loc.x, player_info.current_loc.y - 3}, {player_info.current_loc.x + 1, player_info.current_loc.y - 3}, {player_info.current_loc.x + 2, player_info.current_loc.y - 3}, {player_info.current_loc.x + 3, player_info.current_loc.y - 3} },
+      { {player_info.current_loc.x - 3, player_info.current_loc.y - 2}, {player_info.current_loc.x - 2, player_info.current_loc.y - 2}, {player_info.current_loc.x - 1, player_info.current_loc.y - 2}, {player_info.current_loc.x, player_info.current_loc.y - 2}, {player_info.current_loc.x + 1, player_info.current_loc.y - 2}, {player_info.current_loc.x + 2, player_info.current_loc.y - 2}, {player_info.current_loc.x + 3, player_info.current_loc.y - 2} },
+      { {player_info.current_loc.x - 3, player_info.current_loc.y - 1}, {player_info.current_loc.x - 2, player_info.current_loc.y - 1}, {player_info.current_loc.x - 1, player_info.current_loc.y - 1}, {player_info.current_loc.x, player_info.current_loc.y - 1}, {player_info.current_loc.x + 1, player_info.current_loc.y - 1}, {player_info.current_loc.x + 2, player_info.current_loc.y - 1}, {player_info.current_loc.x + 3, player_info.current_loc.y - 1} },
+      { {player_info.current_loc.x - 3, player_info.current_loc.y}, {player_info.current_loc.x - 2, player_info.current_loc.y}, {player_info.current_loc.x - 1, player_info.current_loc.y}, {player_info.current_loc.x, player_info.current_loc.y}, {player_info.current_loc.x + 1, player_info.current_loc.y}, {player_info.current_loc.x + 2, player_info.current_loc.y}, {player_info.current_loc.x + 3, player_info.current_loc.y} },
+      { {player_info.current_loc.x - 3, player_info.current_loc.y + 1}, {player_info.current_loc.x - 2, player_info.current_loc.y + 1}, {player_info.current_loc.x - 1, player_info.current_loc.y + 1}, {player_info.current_loc.x, player_info.current_loc.y + 1}, {player_info.current_loc.x + 1, player_info.current_loc.y + 1}, {player_info.current_loc.x + 2, player_info.current_loc.y + 1}, {player_info.current_loc.x + 3, player_info.current_loc.y + 1} },
+      { {player_info.current_loc.x - 3, player_info.current_loc.y + 2}, {player_info.current_loc.x - 2, player_info.current_loc.y + 2}, {player_info.current_loc.x - 1, player_info.current_loc.y + 2}, {player_info.current_loc.x, player_info.current_loc.y + 2}, {player_info.current_loc.x + 1, player_info.current_loc.y + 2}, {player_info.current_loc.x + 2, player_info.current_loc.y + 2}, {player_info.current_loc.x + 3, player_info.current_loc.y + 2} },
+      { {player_info.current_loc.x - 3, player_info.current_loc.y + 3}, {player_info.current_loc.x - 2, player_info.current_loc.y + 3}, {player_info.current_loc.x - 1, player_info.current_loc.y + 3}, {player_info.current_loc.x, player_info.current_loc.y + 3}, {player_info.current_loc.x + 1, player_info.current_loc.y + 3}, {player_info.current_loc.x + 2, player_info.current_loc.y + 3}, {player_info.current_loc.x + 3, player_info.current_loc.y + 3} }
+   };
+
+   srand(time(NULL));
+
    if(noun != NULL){
-      if (strcmp(noun, "up") == 0 && p->current_loc.y > 0){
-         p->current_loc.y -= 1;
-         printf("Flying up\n");
-         printf("New Co-ordinates: x: %d y: %d", p->current_loc.x, p->current_loc.y);
-      } else if (strcmp(noun, "down") == 0 && p->current_loc.y < n-1){
-         p->current_loc.y += 1;
-         printf("Flying down\n");
-         printf("New Co-ordinates: x: %d y: %d", p->current_loc.x, p->current_loc.y);
-      } else if (strcmp(noun, "left") == 0 && p->current_loc.x > 0){
-         p->current_loc.x -= 1;
-         printf("Flying left\n");
-         printf("New Co-ordinates: x: %d y: %d", p->current_loc.x, p->current_loc.y);
-      } else if (strcmp(noun, "right") == 0 && p->current_loc.x < n-1){
-         p->current_loc.x += 1;
-         printf("Flying right\n");
-         printf("New Co-ordinates: x: %d y: %d", p->current_loc.x, p->current_loc.y);
+      if (strcmp(noun, "up") == 0 && player_info.current_loc.y > 0){
+         player_info.current_loc.y -= 1;
+         printf("Flying upwards...\n");
+         printf("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
+      } else if (strcmp(noun, "down") == 0 && player_info.current_loc.y < n-1){
+         player_info.current_loc.y += 1;
+         printf("Flying downwards...\n");
+         printf("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
+      } else if (strcmp(noun, "left") == 0 && player_info.current_loc.x > 0){
+         player_info.current_loc.x -= 1;
+         printf("Flying left...\n");
+         printf("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
+      } else if (strcmp(noun, "right") == 0 && player_info.current_loc.x < n-1){
+         player_info.current_loc.x += 1;
+         printf("Flying right...\n");
+         printf("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
       } else{
          printf("Can't fly in that direction");
+      }
+
+      if (cell[player_info.current_loc.x][player_info.current_loc.y].has_scrap == 1){
+         int chance = rand() % 10; // Random chance of taking damage if the cell has scrap
+         //printf("Chance value: %d\n", chance); Debugging
+
+         if(chance > 5 && chance < 11){
+            player_info.hp -= 1+rand() % 10;
+            printf("\nYour ship has taken damage!!");
+         }
+      }
+   }
+   updateAsteroidPosition();
+
+   for(int i = 0; i < 7; i++){
+      for(int j = 0; j < 7; j++){
+         int x = scannable_cells[i][j].x;
+         int y = scannable_cells[i][j].y;
+
+         if(asteroid.x == x && asteroid.y == y) printf("\nAsteroid detected within 3 spaces. Unable to determine from what direction...\nKeep an eye out!");
       }
    }
 }
 
-void executeShow(Player *p, char *noun){
+/* Asteroid flies in a random direction
+// Made redudant due to removing asteroid.tajectories variables
+
+void updateAsteroidPosition() {
+   asteroid.current_loc.x += asteroid.trajectory.x;
+   asteroid.current_loc.y += asteroid.trajectory.y;
+
+   // Ensure asteroid wraps around the grid
+   if (asteroid.current_loc.x >= n) asteroid.current_loc.x = 0;
+   if (asteroid.current_loc.x < 0) asteroid.current_loc.x = n-1;
+   if (asteroid.current_loc.y >= n) asteroid.current_loc.y = 0;
+   if (asteroid.current_loc.y < 0) asteroid.current_loc.y = n-1;
+
+   // Randomly change direction
+   if (rand() % 10 < 3) { // 30% chance to change direction
+      int direction = rand() % 4; // 0, 1, 2, or 3
+  
+      switch (direction) {
+          case 0: // Move up
+              asteroid.trajectory.x = 0;
+              asteroid.trajectory.y = -1;
+              break;
+          case 1: // Move down
+              asteroid.trajectory.x = 0;
+              asteroid.trajectory.y = 1;
+              break;
+          case 2: // Move left
+              asteroid.trajectory.x = -1;
+              asteroid.trajectory.y = 0;
+              break;
+          case 3: // Move right
+              asteroid.trajectory.x = 1;
+              asteroid.trajectory.y = 0;
+              break;
+      }
+  }
+}
+*/
+
+//Asteroid flies in a predefined path
+void updateAsteroidPosition() {
+   static int step = 0; // static variable means step doesn't reset to 0 everytime the fucntion is run
+   Coord predefined_path[] = {
+      {1, 0}, {1, 0}, {0, 1}, {0, 1}, {-1, 0}, {-1, 0}, {0, 1}, {0, 1},      // Move right twice, down twice, left twice, down twice
+      {1, 0}, {1, 0}, {0, -1}, {0, -1}, {1, 0}, {1, 0}, {0, 1}, {0, 1},     // Move right twice, up twice, right twice, down twice
+      {-1, 0}, {-1, 0}, {0, -1}, {0, -1}, {1, 0}, {0, 1}, {-1, 0}, {0, 1},  // Move left twice, up twice, right once, down once, left once, down once
+      {1, 0}, {0, -1}, {1, 0}, {0, 1}, {-1, 0}, {0, -1}, {-1, 0}, {0, 1}    // Move right once, up once, right once, down once, left twice, up once
+  };
+   int path_length = sizeof(predefined_path) / sizeof(predefined_path[0]);
+
+   asteroid.x += predefined_path[step].x;
+   asteroid.y += predefined_path[step].y;
+
+   // Ensure asteroid wraps around the grid
+   if (asteroid.x >= n) asteroid.x = 0;
+   if (asteroid.x < 0) asteroid.x = n-1;
+   if (asteroid.y >= n) asteroid.y = 0;
+   if (asteroid.y < 0) asteroid.y = n-1;
+
+   step = (step + 1) % path_length;
+}
+
+void executeShow(char *noun){
    if(noun != NULL){
       if (strcmp(noun, "map") == 0){
          printf(" ");
@@ -81,11 +183,13 @@ void executeShow(Player *p, char *noun){
             printf("|");
 
             for(int x = 0; x < n; x++){             
-               if (x == p->current_loc.x && y == p->current_loc.y){
+               if (x == player_info.current_loc.x && y == player_info.current_loc.y){
                   printf("  x  ");
-               }else{
-                   printf(" [0] ");
-               }
+               } else if (x == asteroid.x && y == asteroid.y){
+                  printf("  A  ");
+              } else {
+                  printf(" [0] ");
+              }
             }
             printf("|\n");
          }
@@ -96,17 +200,24 @@ void executeShow(Player *p, char *noun){
          }
          printf("\n");
       } else if(strcmp(noun, "data") == 0){
-         print_player(p);
+         print_player(&player_info);
       }
    }
 }
 
-void executeCollect(Player *p){
-   p->num_scrap += 1;
-   printf("Collecting scrap...\nScrap collected!");
+void executeCollect(){
+   
+   if(cell[player_info.current_loc.x][player_info.current_loc.y].has_scrap == 1) {
+   
+      player_info.num_scrap += 1;
+      cell[player_info.current_loc.x][player_info.current_loc.y].has_scrap = 0;
+      printf("Collecting scrap...\nScrap collected!");
+   } else {
+      printf("No scrap to collect!");
+   }
 }
 
-bool executecommand(char *input, Player *p, Cell (*cell)[n]){
+bool executecommand(char *input){
    char *verb = strtok(input, " \n");
    char *noun = strtok(NULL, "\n");
 
@@ -115,13 +226,27 @@ bool executecommand(char *input, Player *p, Cell (*cell)[n]){
          return false;
       } else if (strcmp(verb, "scan") == 0) {
          printf("Scanning...\n");
-         executeScan(p, cell);
+         executeScan();
       } else if (strcmp(verb, "show") == 0) {
-         executeShow(p, noun);
+         executeShow(noun);
       } else if(strcmp(verb, "help") == 0){
-         printf("HELP\nCommands: ");
-      } else if(strcmp(verb, "fly") == 0){
-         executeFly(p, noun);
+         printf("COMMANDS: \n");
+         printf("quit: Exit the game.\n");
+         printf("scan: Scan the surrounding cells.\n");
+         printf("show [object]: Display information.\n");
+         printf("\tshow map: Display the map.\n");
+         printf("\tshow data: Display player data.\n");
+         printf("help: Display help information.\n");
+         printf("fly [direction]: Move the player.\n");
+         printf("\tfly up: Move up.\n");
+         printf("\tfly down: Move down.\n");
+         printf("\tfly left: Move left.\n");
+         printf("\tfly right: Move right.\n");
+         printf("collect: Collect scrap from the current cell.");
+      } else if(strcmp(verb, "fly") == 0 && noun != NULL && strlen(noun) > 0){
+         executeFly(noun);
+      } else if(strcmp(verb, "collect") == 0){ 
+         executeCollect();
       } else {
          printf("Unknown command!\n");
       }

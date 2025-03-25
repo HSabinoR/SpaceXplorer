@@ -5,9 +5,13 @@
 #define FUNCTIONS_H
 
 extern int n;
-bool executecommand(char *input, Player *p, Cell (*cell)[n]);
-void executeScan(Player *player, Cell (*cell)[n]);
-void executeFly(Player *p, char *noun);
-void executeShow(Player *p, char *noun);
-void executeCollect(Player *p);
+extern Cell** cell;
+extern Player player_info;
+extern Coord asteroid;
+bool executecommand(char *input);
+void executeScan();
+void executeFly(char *noun);
+void executeShow(char *noun);
+void executeCollect();
+void updateAsteroidPosition();
 #endif

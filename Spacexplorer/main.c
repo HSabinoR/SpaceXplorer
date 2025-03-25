@@ -11,6 +11,9 @@ The following commands need to be used in order to run:
 #include "structures.h"
 #include "functions.h"
 
+#define MIN_GRID_SIZE 18
+#define MAX_GRID_SIZE 24
+
 char command[50];
 
 bool getInput(void){
@@ -19,15 +22,31 @@ bool getInput(void){
 }
 
 int n;
+Cell** cell;
+Player player_info = {"Henrique", {0, 0}, 100, 0, 100};
+Coord asteroid;
 
 int main(){
     srand(time(NULL));
 
-    n = 18 + rand() % 6; // Random number between 18 and 24 determining grid size
+    n = MIN_GRID_SIZE + rand() % (MAX_GRID_SIZE - MIN_GRID_SIZE + 1); // Random number between 18 and 24 determining grid size
 
-    Player player_info = {"Henrique", {rand() % n, rand() % n}, 100, 0, 100}; // Starting conditions
+    //player_info = (Player){"Henrique", {rand() % n, rand() % n}, 100, 0, 100}; // Starting conditions
+    // Set the initial position of the player
+    player_info.current_loc.x = rand() % n;
+    player_info.current_loc.y = rand() % n;
     
-    Cell cell[n][n];
+    asteroid.x = rand() % n;
+    asteroid.y = rand() % n;
+
+
+    // Main menu setup. Load, New game and Check leaderboard systems
+
+
+    cell = malloc(n * sizeof(Cell*));
+    for (int i = 0; i < n; i++) {
+        cell[i] = malloc(n * sizeof(Cell));
+    }
 
     printf("Starting Co-ordinates: x: %d y: %d\n", player_info.current_loc.x, player_info.current_loc.y);
 
@@ -45,10 +64,12 @@ int main(){
         for(int x = 0; x < n; x++){ 
             cell[x][y].has_scrap = 0;
             cell[x][y].has_scrap = rand() % 2; // Randomly add scrap
-            
-            if (x == player_info.current_loc.x && x == player_info.current_loc.y){
+
+            if (x == player_info.current_loc.x && y == player_info.current_loc.y){
                 printf("  x  ");
-            }else{
+            } else if (x == asteroid.x && y == asteroid.y){
+                printf("  A  ");
+            } else {
                 printf(" [0] ");
             }
         }
@@ -62,11 +83,11 @@ int main(){
     }
     printf("\n");
 
-    while(executecommand(command, &player_info, cell) && getInput()){
+
+    // Main Loop
+    while(executecommand(command) && getInput()){
         system("cls");
     }
-
-    system("cls");
 
     // Only exits when enter is pressed
     printf("Press Enter to exit...");
