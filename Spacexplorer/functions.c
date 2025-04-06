@@ -356,14 +356,173 @@ bool checkHealth(){
    }
    return true;
 }
+int mainMenu(){
+   // Main menu setup. Load, New game and Check leaderboard systems    
+   bool running = true;
+   
+   while(running){
+      int choice = 0;
+      do {
+         system("cls");  // Clears screen if needed
+         printf("--Main Menu--\n");
+         printf(" 1. New Game\n");
+         printf(" 2. Load Game\n");
+         printf(" 3. Quit\n");
+         getInput();
+
+         char *ch = strtok(command, " \n");
+         char *endptr;
+         if (ch != NULL) {
+            long num = strtol(ch, &endptr, 10);
+           
+            if (*endptr == '\0' && num > 0 && num < 4) {
+               choice = (int) num;
+               //printf("Choice: %d\n", num); // Debugging
+            }
+         }
+      } while(choice != 1 && choice != 2 && choice != 3);
+   
+      if(choice == 1){
+         printf("\nPlayer Name: ");
+         fgets(player_info.name, sizeof player_info.name, stdin);
+         
+         // Removes any newline(\n) characters from the name.
+         size_t len = strlen(player_info.name);
+         if (len > 0 && player_info.name[len - 1] == '\n') {
+            player_info.name[len - 1] = '\0';
+         }
+
+         system("cls");
+
+         n = MIN_GRID_SIZE + rand() % (MAX_GRID_SIZE - MIN_GRID_SIZE + 1); // Random number between 18 and 24 determining grid size
+         //printf("Initialized grid size\n"); // Debugging
+         
+         // Set the initial position of the player
+         player_info.current_loc.x = rand() % n;
+         player_info.current_loc.y = rand() % n;
+      
+         asteroid.x = rand() % n;
+         asteroid.y = rand() % n;
+
+         // Allocate some memory depending on grid size(n)
+         cell = malloc(n * sizeof(Cell*));
+         for (int i = 0; i < n; i++) {
+            cell[i] = malloc(n * sizeof(Cell));
+         }
+
+         printf("Starting Co-ordinates: x: %d y: %d\n", player_info.current_loc.x, player_info.current_loc.y);
+
+
+         printf(" ");
+         for(int i = 0; i < n*5; i++){
+            printf("_");
+         }
+         printf("\n");
+
+         for(int y = 0; y < n; y++){
+         
+            printf("|");
+
+            for(int x = 0; x < n; x++){ 
+               cell[x][y].has_scrap = 0;
+               cell[x][y].has_scrap = rand() % 2; // Randomly add scrap
+
+               if (x == player_info.current_loc.x && y == player_info.current_loc.y){
+                  printf("  x  ");
+               } /*else if (x == asteroid.x && y == asteroid.y){
+                  //printf("  A  ");
+               }*/ else {
+                  printf(" [0] ");
+               }
+            }
+
+            printf("|\n");
+         }
+
+         printf(" ");
+         for(int i = 0; i < n*5; i++){
+            printf("_");
+         }
+         printf("\n");
+
+         running = false;
+      } else if(choice == 2) {
+         listSaveFiles();
+         char filename[20];
+
+         FILE *file = NULL;
+         while (file == NULL) {
+            printf("Which file would you like to load (include the .txt): ");
+            fgets(filename, sizeof filename, stdin);
+            
+            // Remove trailing newline, if any
+            size_t len = strlen(filename);
+            if (len > 0 && filename[len - 1] == '\n') {
+               filename[len - 1] = '\0';
+            }  
+
+            if (strcmp(filename, "cancel") == 0){
+               break;
+            }
+      
+            file = fopen(filename, "r");
+            if (file == NULL) {
+               printf("File not found. Please enter a valid filename.\n");
+            }
+         }
+
+         if(file != NULL){
+            running = false;
+            system("cls");
+
+            fclose(file);
+            loadGame(filename);
+            printf("Starting Co-ordinates: x: %d y: %d\n", player_info.current_loc.x, player_info.current_loc.y);
+
+
+            printf(" ");
+            for(int i = 0; i < n*5; i++){
+               printf("_");
+            }
+            printf("\n");
+
+            for(int y = 0; y < n; y++){
+            
+               printf("|");
+
+               for(int x = 0; x < n; x++){
+                  if (x == player_info.current_loc.x && y == player_info.current_loc.y){
+                     printf("  x  ");
+                  } /*else if (x == asteroid.x && y == asteroid.y){
+                     //printf("  A  ");
+                  }*/ else {
+                     printf(" [0] ");
+                  }
+               }
+
+               printf("|\n");
+            }
+
+            printf(" ");
+            for(int i = 0; i < n*5; i++){
+               printf("_");
+            }
+            printf("\n");
+         }
+      } else if(choice == 3) {
+         running = false; 
+         return 0;
+      }
+   }
+}
 
 bool executecommand(char *input) {
    char *verb = strtok(input, " \n");
    char *noun = strtok(NULL, "\n");
-
+   printf("Type \"help\" to see all the commands.\n\n");
    if (verb != NULL) {
       if (strcmp(verb, "quit") == 0) {
-         printf("Saving...");
+         printf("Saving...\n");
          saveGame();
          return false;
       } else if (strcmp(verb, "scan") == 0) {

@@ -8,6 +8,10 @@ extern int n;
 extern Cell** cell;
 extern Player player_info;
 extern Coord asteroid;
+int MIN_GRID_SIZE;
+int MAX_GRID_SIZE;
+char command[50];
+bool getInput(void);
 bool executecommand(char *input);
 void executeScan(char *noun);
 void executeFly(char *noun);
@@ -18,4 +22,5 @@ void saveGame();
 void loadGame(char *filename);
 void listSaveFiles();
 bool checkHealth();
+int mainMenu();
 #endif
