@@ -572,7 +572,7 @@ bool executecommand(char *input) {
          printf("\tfly left: Move left.\n");
          printf("\tfly right: Move right.\n");
          printf("collect: Collect scrap from the current cell.\n");
-         printf("Repair []");
+         printf("repair [Number of Scrap to use]: Repair the ship using the scrap collected. 1 Scrap = 1 HP\n");
       } else if(strcmp(verb, "fly") == 0 && noun != NULL && strlen(noun) > 0){
          executeFly(noun);
       } else if(strcmp(verb, "collect") == 0){ 
