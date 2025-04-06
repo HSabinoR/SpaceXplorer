@@ -1,22 +1,28 @@
-#include "functions.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
-#include "structures.h"
 #include <time.h>
+#include <ctype.h>
+#include <dirent.h>
+#include "structures.h"
+#include "functions.h"
 
 
-void executeScan(char *noun){
-   /* // Made redudant with varying gridSize
+void executeScan(char *noun) {
    Coord scannable_cells[3][3] = {
       { {player_info.current_loc.x - 1, player_info.current_loc.y - 1}, {player_info.current_loc.x, player_info.current_loc.y - 1}, {player_info.current_loc.x + 1, player_info.current_loc.y - 1} },
       { {player_info.current_loc.x - 1, player_info.current_loc.y}, {player_info.current_loc.x, player_info.current_loc.y}, {player_info.current_loc.x + 1, player_info.current_loc.y} },
       { {player_info.current_loc.x - 1, player_info.current_loc.y + 1}, {player_info.current_loc.x, player_info.current_loc.y + 1}, {player_info.current_loc.x + 1, player_info.current_loc.y + 1} }
    };
-   */
+   
+   
    
    int gridSize = 3; // Default grid size
+   
+   // Decided to make it so player can only scan 1 cell in each directions
+   
+   /*
    char *endptr;
 
    if (noun != NULL) {
@@ -43,8 +49,8 @@ void executeScan(char *noun){
          scannable_cells[i][j].y = player_info.current_loc.y - (gridSize / 2) + i;
       }
    }
-
-   for(int i = 0; i < gridSize; i++){
+   */
+   for(int i = 0; i < gridSize; i++) {
         
       printf("|");
 
@@ -55,15 +61,15 @@ void executeScan(char *noun){
 
          if (y < 0 || y >= n) {
             printf("-----"); // Out of bounds
-         } else if(x >= n){
+         } else if(x >= n) {
             printf("  <  "); // Out of bounds
-         } else if(x < 0){
+         } else if(x < 0) {
             printf("  >  "); // Out of bounds
          } else if (x == player_info.current_loc.x && y == player_info.current_loc.y) {
             printf("  x  "); // Player's position
          } else if (cell[x][y].has_scrap) {
             printf(" [#] "); // Scrap detected
-         } else if (x == asteroid.x && y == asteroid.y){
+         } else if (x == asteroid.x && y == asteroid.y) {
             printf("  A  "); // Asteroid detected
         } else {
             printf(" [0] "); // Empty cell
@@ -74,33 +80,36 @@ void executeScan(char *noun){
    int x = player_info.current_loc.x;
    int y = player_info.current_loc.y;
 
-   if (cell[x][y].has_scrap == 1){
+   if (cell[x][y].has_scrap == 1) {
       printf("\nThe cell you're on has some space junk!");
    }
 
-   // Free the allocated memory
+   /* // Free the allocated memory
    for (int i = 0; i < gridSize; i++) {
       free(scannable_cells[i]);
    }
    free(scannable_cells);
+   */
 }
 
-void executeFly(char *noun){
+void executeFly(char *noun) {
    
    // Scannable cells to detect the asteroid
-   Coord scannable_cells[7][7] = {
-      { {player_info.current_loc.x - 3, player_info.current_loc.y - 3}, {player_info.current_loc.x - 2, player_info.current_loc.y - 3}, {player_info.current_loc.x - 1, player_info.current_loc.y - 3}, {player_info.current_loc.x, player_info.current_loc.y - 3}, {player_info.current_loc.x + 1, player_info.current_loc.y - 3}, {player_info.current_loc.x + 2, player_info.current_loc.y - 3}, {player_info.current_loc.x + 3, player_info.current_loc.y - 3} },
-      { {player_info.current_loc.x - 3, player_info.current_loc.y - 2}, {player_info.current_loc.x - 2, player_info.current_loc.y - 2}, {player_info.current_loc.x - 1, player_info.current_loc.y - 2}, {player_info.current_loc.x, player_info.current_loc.y - 2}, {player_info.current_loc.x + 1, player_info.current_loc.y - 2}, {player_info.current_loc.x + 2, player_info.current_loc.y - 2}, {player_info.current_loc.x + 3, player_info.current_loc.y - 2} },
-      { {player_info.current_loc.x - 3, player_info.current_loc.y - 1}, {player_info.current_loc.x - 2, player_info.current_loc.y - 1}, {player_info.current_loc.x - 1, player_info.current_loc.y - 1}, {player_info.current_loc.x, player_info.current_loc.y - 1}, {player_info.current_loc.x + 1, player_info.current_loc.y - 1}, {player_info.current_loc.x + 2, player_info.current_loc.y - 1}, {player_info.current_loc.x + 3, player_info.current_loc.y - 1} },
-      { {player_info.current_loc.x - 3, player_info.current_loc.y}, {player_info.current_loc.x - 2, player_info.current_loc.y}, {player_info.current_loc.x - 1, player_info.current_loc.y}, {player_info.current_loc.x, player_info.current_loc.y}, {player_info.current_loc.x + 1, player_info.current_loc.y}, {player_info.current_loc.x + 2, player_info.current_loc.y}, {player_info.current_loc.x + 3, player_info.current_loc.y} },
-      { {player_info.current_loc.x - 3, player_info.current_loc.y + 1}, {player_info.current_loc.x - 2, player_info.current_loc.y + 1}, {player_info.current_loc.x - 1, player_info.current_loc.y + 1}, {player_info.current_loc.x, player_info.current_loc.y + 1}, {player_info.current_loc.x + 1, player_info.current_loc.y + 1}, {player_info.current_loc.x + 2, player_info.current_loc.y + 1}, {player_info.current_loc.x + 3, player_info.current_loc.y + 1} },
-      { {player_info.current_loc.x - 3, player_info.current_loc.y + 2}, {player_info.current_loc.x - 2, player_info.current_loc.y + 2}, {player_info.current_loc.x - 1, player_info.current_loc.y + 2}, {player_info.current_loc.x, player_info.current_loc.y + 2}, {player_info.current_loc.x + 1, player_info.current_loc.y + 2}, {player_info.current_loc.x + 2, player_info.current_loc.y + 2}, {player_info.current_loc.x + 3, player_info.current_loc.y + 2} },
-      { {player_info.current_loc.x - 3, player_info.current_loc.y + 3}, {player_info.current_loc.x - 2, player_info.current_loc.y + 3}, {player_info.current_loc.x - 1, player_info.current_loc.y + 3}, {player_info.current_loc.x, player_info.current_loc.y + 3}, {player_info.current_loc.x + 1, player_info.current_loc.y + 3}, {player_info.current_loc.x + 2, player_info.current_loc.y + 3}, {player_info.current_loc.x + 3, player_info.current_loc.y + 3} }
-   };
+   Coord scannable_cells[9][9] = {
+      { {player_info.current_loc.x - 4, player_info.current_loc.y - 4}, {player_info.current_loc.x - 3, player_info.current_loc.y - 4}, {player_info.current_loc.x - 2, player_info.current_loc.y - 4}, {player_info.current_loc.x - 1, player_info.current_loc.y - 4}, {player_info.current_loc.x, player_info.current_loc.y - 4}, {player_info.current_loc.x + 1, player_info.current_loc.y - 4}, {player_info.current_loc.x + 2, player_info.current_loc.y - 4}, {player_info.current_loc.x + 3, player_info.current_loc.y - 4}, {player_info.current_loc.x + 4, player_info.current_loc.y - 4} },
+      { {player_info.current_loc.x - 4, player_info.current_loc.y - 3}, {player_info.current_loc.x - 3, player_info.current_loc.y - 3}, {player_info.current_loc.x - 2, player_info.current_loc.y - 3}, {player_info.current_loc.x - 1, player_info.current_loc.y - 3}, {player_info.current_loc.x, player_info.current_loc.y - 3}, {player_info.current_loc.x + 1, player_info.current_loc.y - 3}, {player_info.current_loc.x + 2, player_info.current_loc.y - 3}, {player_info.current_loc.x + 3, player_info.current_loc.y - 3}, {player_info.current_loc.x + 4, player_info.current_loc.y - 3} },
+      { {player_info.current_loc.x - 4, player_info.current_loc.y - 2}, {player_info.current_loc.x - 3, player_info.current_loc.y - 2}, {player_info.current_loc.x - 2, player_info.current_loc.y - 2}, {player_info.current_loc.x - 1, player_info.current_loc.y - 2}, {player_info.current_loc.x, player_info.current_loc.y - 2}, {player_info.current_loc.x + 1, player_info.current_loc.y - 2}, {player_info.current_loc.x + 2, player_info.current_loc.y - 2}, {player_info.current_loc.x + 3, player_info.current_loc.y - 2}, {player_info.current_loc.x + 4, player_info.current_loc.y - 2} },
+      { {player_info.current_loc.x - 4, player_info.current_loc.y - 1}, {player_info.current_loc.x - 3, player_info.current_loc.y - 1}, {player_info.current_loc.x - 2, player_info.current_loc.y - 1}, {player_info.current_loc.x - 1, player_info.current_loc.y - 1}, {player_info.current_loc.x, player_info.current_loc.y - 1}, {player_info.current_loc.x + 1, player_info.current_loc.y - 1}, {player_info.current_loc.x + 2, player_info.current_loc.y - 1}, {player_info.current_loc.x + 3, player_info.current_loc.y - 1}, {player_info.current_loc.x + 4, player_info.current_loc.y - 1} },
+      { {player_info.current_loc.x - 4, player_info.current_loc.y}, {player_info.current_loc.x - 3, player_info.current_loc.y}, {player_info.current_loc.x - 2, player_info.current_loc.y}, {player_info.current_loc.x - 1, player_info.current_loc.y}, {player_info.current_loc.x, player_info.current_loc.y}, {player_info.current_loc.x + 1, player_info.current_loc.y}, {player_info.current_loc.x + 2, player_info.current_loc.y}, {player_info.current_loc.x + 3, player_info.current_loc.y}, {player_info.current_loc.x + 4, player_info.current_loc.y} },
+      { {player_info.current_loc.x - 4, player_info.current_loc.y + 1}, {player_info.current_loc.x - 3, player_info.current_loc.y + 1}, {player_info.current_loc.x - 2, player_info.current_loc.y + 1}, {player_info.current_loc.x - 1, player_info.current_loc.y + 1}, {player_info.current_loc.x, player_info.current_loc.y + 1}, {player_info.current_loc.x + 1, player_info.current_loc.y + 1}, {player_info.current_loc.x + 2, player_info.current_loc.y + 1}, {player_info.current_loc.x + 3, player_info.current_loc.y + 1}, {player_info.current_loc.x + 4, player_info.current_loc.y + 1} },
+      { {player_info.current_loc.x - 4, player_info.current_loc.y + 2}, {player_info.current_loc.x - 3, player_info.current_loc.y + 2}, {player_info.current_loc.x - 2, player_info.current_loc.y + 2}, {player_info.current_loc.x - 1, player_info.current_loc.y + 2}, {player_info.current_loc.x, player_info.current_loc.y + 2}, {player_info.current_loc.x + 1, player_info.current_loc.y + 2}, {player_info.current_loc.x + 2, player_info.current_loc.y + 2}, {player_info.current_loc.x + 3, player_info.current_loc.y + 2}, {player_info.current_loc.x + 4, player_info.current_loc.y + 2} },
+      { {player_info.current_loc.x - 4, player_info.current_loc.y + 3}, {player_info.current_loc.x - 3, player_info.current_loc.y + 3}, {player_info.current_loc.x - 2, player_info.current_loc.y + 3}, {player_info.current_loc.x - 1, player_info.current_loc.y + 3}, {player_info.current_loc.x, player_info.current_loc.y + 3}, {player_info.current_loc.x + 1, player_info.current_loc.y + 3}, {player_info.current_loc.x + 2, player_info.current_loc.y + 3}, {player_info.current_loc.x + 3, player_info.current_loc.y + 3}, {player_info.current_loc.x + 4, player_info.current_loc.y + 3} },
+      { {player_info.current_loc.x - 4, player_info.current_loc.y + 4}, {player_info.current_loc.x - 3, player_info.current_loc.y + 4}, {player_info.current_loc.x - 2, player_info.current_loc.y + 4}, {player_info.current_loc.x - 1, player_info.current_loc.y + 4}, {player_info.current_loc.x, player_info.current_loc.y + 4}, {player_info.current_loc.x + 1, player_info.current_loc.y + 4}, {player_info.current_loc.x + 2, player_info.current_loc.y + 4}, {player_info.current_loc.x + 3, player_info.current_loc.y + 4}, {player_info.current_loc.x + 4, player_info.current_loc.y + 4} }
+  };
 
    srand(time(NULL));
 
-   if(noun != NULL){
+   if(noun != NULL) {
       if (strcmp(noun, "up") == 0 && player_info.current_loc.y > 0){
          player_info.current_loc.y -= 1;
          printf("Flying upwards...\n");
@@ -128,17 +137,21 @@ void executeFly(char *noun){
          if(chance > 5 && chance < 11){
             player_info.hp -= 1+rand() % 10;
             printf("\nYour ship has taken damage!!");
+            if(player_info.hp <= 0){
+               checkHealth();
+            }
          }
       }
    }
    updateAsteroidPosition();
 
-   for(int i = 0; i < 7; i++){
-      for(int j = 0; j < 7; j++){
+   // Asteroid Detection
+   for(int i = 0; i < 9; i++) {
+      for(int j = 0; j < 9; j++){
          int x = scannable_cells[i][j].x;
          int y = scannable_cells[i][j].y;
 
-         if(asteroid.x == x && asteroid.y == y) printf("\nAsteroid detected within 3 spaces. Unable to determine from what direction...\nKeep an eye out!");
+         if(asteroid.x == x && asteroid.y == y) printf("\nAsteroid detected within 4 spaces. Unable to determine from what direction...\nKeep an eye out!");
       }
    }
 }
@@ -205,7 +218,7 @@ void updateAsteroidPosition() {
    step = (step + 1) % path_length;
 }
 
-void executeShow(char *noun){
+void executeShow(char *noun) {
    if(noun != NULL){
       if (strcmp(noun, "map") == 0){
          printf(" ");
@@ -221,9 +234,9 @@ void executeShow(char *noun){
             for(int x = 0; x < n; x++){             
                if (x == player_info.current_loc.x && y == player_info.current_loc.y){
                   printf("  x  ");
-               } else if (x == asteroid.x && y == asteroid.y){
-                  printf("  A  ");
-              } else {
+               }/*else if (x == asteroid.x && y == asteroid.y){
+                  //printf("  A  ");
+              } */else {
                   printf(" [0] ");
               }
             }
@@ -241,7 +254,7 @@ void executeShow(char *noun){
    }
 }
 
-void executeCollect(){
+void executeCollect() {
    
    if(cell[player_info.current_loc.x][player_info.current_loc.y].has_scrap == 1) {
    
@@ -253,12 +266,105 @@ void executeCollect(){
    }
 }
 
-bool executecommand(char *input){
+void saveGame() {
+   char filename[30];
+   snprintf(filename, sizeof(filename), "%s.txt", player_info.name);
+   
+   for (int i = 0; filename[i] != '\0'; i++) {
+      if (!isalnum((unsigned char)filename[i]) && filename[i] != '.') {
+         filename[i] = '_'; // Replace invalid characters with underscore
+      }
+   }
+
+   FILE *file = fopen(filename, "w");
+   if (file == NULL) {
+      perror("Failed to open file for writing");
+      return;
+   }
+
+   // Save player info, including player's name
+   fprintf(file, "%s\n%d %d %d %d %d %d\n", player_info.name, player_info.current_loc.x, player_info.current_loc.y, player_info.hp, player_info.num_scrap, player_info.oxygen, n);
+   // Save asteroid Coords
+   fprintf(file, "%d %d\n", asteroid.x, asteroid.y);
+   
+   // Save cell data
+   for (int y = 0; y < n; y++) {
+      for (int x = 0; x < n; x++) {
+         fprintf(file, "%d ", cell[y][x].has_scrap);
+      }
+      fprintf(file, "\n");
+   }
+
+   fclose(file);
+}
+
+void loadGame(char *filename) {
+   FILE *file = fopen(filename, "r");
+   if (file == NULL) {
+      perror("Failed to open file for reading");
+      return;
+   }
+
+   // Load player info, including player's name
+   fscanf(file, "%14s\n%d %d %d %d %d %d", &player_info.name, &player_info.current_loc.x, &player_info.current_loc.y, &player_info.hp, &player_info.num_scrap, &player_info.oxygen, &n);
+   printf("Loaded player details...\n");
+
+   // Load asteroid Coords
+   fscanf(file, "%d %d", &asteroid.x, &asteroid.y);
+   printf("Loaded asteroid coords...\n");
+
+   cell = malloc(n * sizeof(Cell*));
+   for (int i = 0; i < n; i++) {
+      cell[i] = malloc(n * sizeof(Cell));
+   }
+
+   // Load cell data
+   for (int y = 0; y < n; y++) {
+      for (int x = 0; x < n; x++) {
+         fscanf(file, "%d ", &cell[y][x].has_scrap);
+         //printf("Loaded cell[%d][%d] data...\n", y, x); // Debugging
+      }
+   }
+
+   fclose(file);
+}
+
+void listSaveFiles() {
+   DIR *d;
+   struct dirent *dir;
+   d = opendir(".");
+   if (d) {
+      printf("Available save files:\n");
+      while ((dir = readdir(d)) != NULL) {
+         if (strstr(dir->d_name, ".txt")) {
+            printf("%s\n", dir->d_name);
+         }
+      }
+      closedir(d);
+   } else {
+      perror("Failed to open directory");
+   }
+}
+
+bool checkHealth(){
+   if(asteroid.x == player_info.current_loc.x && asteroid.y == player_info.current_loc.y){
+      printf("You have hit an asteroid!! \n\t!!GAME OVER!!");
+      return false;
+   }else if(player_info.hp <= 0){
+      printf("Your ship has taken too much damage!! \n\t!!GAME OVER!!");
+      return false;
+   }
+   return true;
+}
+
+bool executecommand(char *input) {
    char *verb = strtok(input, " \n");
    char *noun = strtok(NULL, "\n");
 
    if (verb != NULL) {
       if (strcmp(verb, "quit") == 0) {
+         printf("Saving...");
+         saveGame();
          return false;
       } else if (strcmp(verb, "scan") == 0) {
          printf("Scanning...\n");
@@ -287,5 +393,5 @@ bool executecommand(char *input){
          printf("Unknown command!\n");
       }
    }
-   return true;
+   return checkHealth;
 }

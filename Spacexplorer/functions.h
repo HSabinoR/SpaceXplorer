@@ -14,4 +14,8 @@ void executeFly(char *noun);
 void executeShow(char *noun);
 void executeCollect();
 void updateAsteroidPosition();
+void saveGame();
+void loadGame(char *filename);
+void listSaveFiles();
+bool checkHealth();
 #endif

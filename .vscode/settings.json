@@ -2,6 +2,7 @@
     "files.associations": {
         "*.ino": "cpp",
         "string.h": "c",
-        "structures.h": "c"
+        "structures.h": "c",
+        "stdbool.h": "c"
     }
 }

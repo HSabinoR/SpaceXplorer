@@ -8,7 +8,7 @@ typedef struct
 
 typedef struct
 {
-    const char name[15];
+    char name[15];
     Coord current_loc;
     int hp;
     int num_scrap;
