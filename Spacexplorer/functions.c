@@ -234,11 +234,11 @@ void executeShow(char *noun) {
             for(int x = 0; x < n; x++){             
                if (x == player_info.current_loc.x && y == player_info.current_loc.y){
                   printf("  x  ");
-               }/*else if (x == asteroid.x && y == asteroid.y){
-                  //printf("  A  ");
-              } */else {
+               } /*else if (x == asteroid.x && y == asteroid.y){
+                  printf("  A  ");
+               }*/ else {
                   printf(" [0] ");
-              }
+               }
             }
             printf("|\n");
          }
@@ -283,7 +283,7 @@ void saveGame() {
    }
 
    // Save player info, including player's name
-   fprintf(file, "%s\n%d %d %d %d %d %d\n", player_info.name, player_info.current_loc.x, player_info.current_loc.y, player_info.hp, player_info.num_scrap, player_info.oxygen, n);
+   fprintf(file, "%d %s\n%d %d %d %d %d %d\n", turn, player_info.name, player_info.current_loc.x, player_info.current_loc.y, player_info.hp, player_info.num_scrap, player_info.oxygen, n);
    // Save asteroid Coords
    fprintf(file, "%d %d\n", asteroid.x, asteroid.y);
    
@@ -306,7 +306,7 @@ void loadGame(char *filename) {
    }
 
    // Load player info, including player's name
-   fscanf(file, "%14s\n%d %d %d %d %d %d", &player_info.name, &player_info.current_loc.x, &player_info.current_loc.y, &player_info.hp, &player_info.num_scrap, &player_info.oxygen, &n);
+   fscanf(file, "%d %14s\n%d %d %d %d %d %d", &turn, &player_info.name, &player_info.current_loc.x, &player_info.current_loc.y, &player_info.hp, &player_info.num_scrap, &player_info.oxygen, &n);
    printf("Loaded player details...\n");
 
    // Load asteroid Coords
@@ -348,14 +348,15 @@ void listSaveFiles() {
 
 bool checkHealth(){
    if(asteroid.x == player_info.current_loc.x && asteroid.y == player_info.current_loc.y){
-      printf("You have hit an asteroid!! \n\t!!GAME OVER!!");
+      printf("\nYou have hit an asteroid!! \n\t!!GAME OVER!!\n");
       return false;
    }else if(player_info.hp <= 0){
-      printf("Your ship has taken too much damage!! \n\t!!GAME OVER!!");
+      printf("\nYour ship has taken too much damage!! \n\t!!GAME OVER!!\n");
       return false;
    }
    return true;
 }
+
 int mainMenu(){
    // Main menu setup. Load, New game and Check leaderboard systems    
    bool running = true;
@@ -445,6 +446,8 @@ int mainMenu(){
          }
          printf("\n");
 
+         turn = 1;
+
          running = false;
       } else if(choice == 2) {
          listSaveFiles();
@@ -516,10 +519,37 @@ int mainMenu(){
    }
 }
 
+void executeRepair() {
+   if (player_info.num_scrap > 0 && player_info.hp < 100) {
+      player_info.num_scrap--;
+      player_info.hp++;
+      printf("You repaired 1 HP using 1 scrap.\n");
+      printf("Current HP: %d, Scrap remaining: %d\n", player_info.hp, player_info.num_scrap);
+   } else if (player_info.num_scrap == 0) {
+      printf("You have no scrap to repair with.\n");
+   } else {
+      printf("Your HP is already full.\n");
+   }
+}
+
+void oxygenControl(){
+   if(player_info.hp < 100 && player_info.hp >= 75) {
+      player_info.oxygen -= 2;
+   } else if(player_info.hp < 75 && player_info.hp >= 50) {
+      player_info.oxygen -= 4;
+   } else if(player_info.hp < 50 && player_info.hp >= 25) {
+      player_info.oxygen -= 6;
+   } else if(player_info.hp < 25 && player_info.hp >= 1) {
+      player_info.oxygen -= 8;
+   }
+}
+
 bool executecommand(char *input) {
    char *verb = strtok(input, " \n");
    char *noun = strtok(NULL, "\n");
    printf("Type \"help\" to see all the commands.\n\n");
+
+   printf("TURN %d\n", turn);
    if (verb != NULL) {
       if (strcmp(verb, "quit") == 0) {
          printf("Saving...\n");
@@ -548,9 +578,13 @@ bool executecommand(char *input) {
          executeFly(noun);
       } else if(strcmp(verb, "collect") == 0){ 
          executeCollect();
-      } else {
+      }  else if (strcmp(verb, "repair") == 0) {
+         executeRepair();
+     } else {
          printf("Unknown command!\n");
       }
    }
-   return checkHealth;
+   oxygenControl();
+   turn++;
+   return checkHealth();
 }

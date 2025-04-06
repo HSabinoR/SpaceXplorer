@@ -11,6 +11,7 @@ extern Coord asteroid;
 int MIN_GRID_SIZE;
 int MAX_GRID_SIZE;
 char command[50];
+int turn;
 bool getInput(void);
 bool executecommand(char *input);
 void executeScan(char *noun);
@@ -23,4 +24,5 @@ void loadGame(char *filename);
 void listSaveFiles();
 bool checkHealth();
 int mainMenu();
+void oxygenControl();
 #endif
