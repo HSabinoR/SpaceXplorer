@@ -20,36 +20,6 @@ void executeScan(char *noun) {
    
    int gridSize = 3; // Default grid size
    
-   // Decided to make it so player can only scan 1 cell in each directions
-   
-   /*
-   char *endptr;
-
-   if (noun != NULL) {
-      // Convert the noun to a long integer
-      long num = strtol(noun, &endptr, 10);
-
-      // Check if the conversion is successful and the entire string is a number
-      if (*endptr == '\0' && num > 0 && num < 4) {
-         gridSize = (int) num * 2 + 1;
-      } // Allows gridSize up 7 
-      //printf("\nScanning range: %d\n", gridSize); Debugging
-   }
-
-   // Allocate memory for scannable_cells depending on gridSize
-   Coord** scannable_cells = malloc(gridSize * sizeof(Coord*));
-   for (int i = 0; i < gridSize; i++) {
-      scannable_cells[i] = malloc(gridSize * sizeof(Coord));
-   }
-
-   // Assign values to scannable_cells
-   for (int i = 0; i < gridSize; i++) {
-      for (int j = 0; j < gridSize; j++) {
-         scannable_cells[i][j].x = player_info.current_loc.x - (gridSize / 2) + j;
-         scannable_cells[i][j].y = player_info.current_loc.y - (gridSize / 2) + i;
-      }
-   }
-   */
    for(int i = 0; i < gridSize; i++) {
         
       printf("|");
@@ -84,12 +54,7 @@ void executeScan(char *noun) {
       printf("\nThe cell you're on has some space junk!");
    }
 
-   /* // Free the allocated memory
-   for (int i = 0; i < gridSize; i++) {
-      free(scannable_cells[i]);
-   }
-   free(scannable_cells);
-   */
+   turn++;
 }
 
 void executeFly(char *noun) {
@@ -114,20 +79,25 @@ void executeFly(char *noun) {
          player_info.current_loc.y -= 1;
          printf("Flying upwards...\n");
          printf("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
+         turn++;
       } else if (strcmp(noun, "down") == 0 && player_info.current_loc.y < n-1){
          player_info.current_loc.y += 1;
          printf("Flying downwards...\n");
          printf("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
+         turn++;
       } else if (strcmp(noun, "left") == 0 && player_info.current_loc.x > 0){
          player_info.current_loc.x -= 1;
          printf("Flying left...\n");
          printf("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
+         turn++;
       } else if (strcmp(noun, "right") == 0 && player_info.current_loc.x < n-1){
          player_info.current_loc.x += 1;
          printf("Flying right...\n");
          printf("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
+         turn++;
       } else{
          printf("Can't fly in that direction");
+         return;
       }
 
       if (cell[player_info.current_loc.x][player_info.current_loc.y].has_scrap == 1){
@@ -137,11 +107,12 @@ void executeFly(char *noun) {
          if(chance > 5 && chance < 11){
             player_info.hp -= 1+rand() % 10;
             printf("\nYour ship has taken damage!!");
-            if(player_info.hp <= 0){
-               checkHealth();
-            }
+            checkHealth();
          }
       }
+   } else {
+      printf("No direction specified!");
+      return;
    }
    updateAsteroidPosition();
 
@@ -156,10 +127,7 @@ void executeFly(char *noun) {
    }
 }
 
-/* Asteroid flies in a random direction
-// Made redudant due to removing asteroid.tajectories variables
-
-void updateAsteroidPosition() {
+/* void updateAsteroidPosition() { Asteroid flies in a random direction. ->Made redudant due to removing asteroid.tajectories variables-<
    asteroid.current_loc.x += asteroid.trajectory.x;
    asteroid.current_loc.y += asteroid.trajectory.y;
 
@@ -195,8 +163,7 @@ void updateAsteroidPosition() {
 }
 */
 
-//Asteroid flies in a predefined path
-void updateAsteroidPosition() {
+void updateAsteroidPosition() { //Asteroid flies in a predefined path
    static int step = 0; // static variable means step doesn't reset to 0 everytime the fucntion is run
    Coord predefined_path[] = {
       {1, 0}, {1, 0}, {0, 1}, {0, 1}, {-1, 0}, {-1, 0}, {0, 1}, {0, 1},      // Move right twice, down twice, left twice, down twice
@@ -248,8 +215,10 @@ void executeShow(char *noun) {
             printf("_");
          }
          printf("\n");
+         turn++;
       } else if(strcmp(noun, "data") == 0){
          print_player(&player_info);
+         turn++;
       }
    }
 }
@@ -261,6 +230,7 @@ void executeCollect() {
       player_info.num_scrap += 1;
       cell[player_info.current_loc.x][player_info.current_loc.y].has_scrap = 0;
       printf("Collecting scrap...\nScrap collected!");
+      turn++;
    } else {
       printf("No scrap to collect!");
    }
@@ -519,16 +489,47 @@ int mainMenu(){
    }
 }
 
-void executeRepair() {
-   if (player_info.num_scrap > 0 && player_info.hp < 100) {
-      player_info.num_scrap--;
-      player_info.hp++;
-      printf("You repaired 1 HP using 1 scrap.\n");
+void executeRepair(char *noun) {
+   char *endptr;
+
+   if (noun != NULL) {
+      // Convert noun to a long
+      long scrap_to_use = strtol(noun, &endptr, 10);
+
+      // Basic input validation
+      if (scrap_to_use <= 0) {
+         printf("Please enter a positive number of scrap to use.\n");
+         return;
+      }
+
+      if (player_info.hp >= 100) {
+         printf("Your HP is already full.\n");
+         return;
+      }
+
+      if (player_info.num_scrap == 0) {
+         printf("You have no scrap to repair with.\n");
+         return;
+      }
+
+      // Cap usage by available scrap
+      if (scrap_to_use > player_info.num_scrap) {
+         scrap_to_use = player_info.num_scrap;
+         printf("Using all the scrap...\n");
+      }
+
+      // Cap usage by max HP
+      int hp_needed = 100 - player_info.hp;
+      int actual_used = (scrap_to_use > hp_needed) ? hp_needed : scrap_to_use;
+
+      player_info.hp += actual_used;
+      player_info.num_scrap -= actual_used;
+
+      printf("You repaired %d HP using %d scrap.\n", actual_used, actual_used);
       printf("Current HP: %d, Scrap remaining: %d\n", player_info.hp, player_info.num_scrap);
-   } else if (player_info.num_scrap == 0) {
-      printf("You have no scrap to repair with.\n");
+      turn++;
    } else {
-      printf("Your HP is already full.\n");
+      printf("Usage: repair <amount>\n");
    }
 }
 
@@ -547,9 +548,6 @@ void oxygenControl(){
 bool executecommand(char *input) {
    char *verb = strtok(input, " \n");
    char *noun = strtok(NULL, "\n");
-   printf("Type \"help\" to see all the commands.\n\n");
-
-   printf("TURN %d\n", turn);
    if (verb != NULL) {
       if (strcmp(verb, "quit") == 0) {
          printf("Saving...\n");
@@ -573,18 +571,21 @@ bool executecommand(char *input) {
          printf("\tfly down: Move down.\n");
          printf("\tfly left: Move left.\n");
          printf("\tfly right: Move right.\n");
-         printf("collect: Collect scrap from the current cell.");
+         printf("collect: Collect scrap from the current cell.\n");
+         printf("Repair []");
       } else if(strcmp(verb, "fly") == 0 && noun != NULL && strlen(noun) > 0){
          executeFly(noun);
       } else if(strcmp(verb, "collect") == 0){ 
          executeCollect();
-      }  else if (strcmp(verb, "repair") == 0) {
-         executeRepair();
-     } else {
+      } else if (strcmp(verb, "repair") == 0) {
+         executeRepair(noun);
+      } else {
          printf("Unknown command!\n");
       }
    }
+   printf("\n\t>TURN %d<\n", turn);
+   printf("Type \"help\" to see all the commands.\n\n");
+
    oxygenControl();
-   turn++;
    return checkHealth();
 }

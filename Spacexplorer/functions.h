@@ -24,5 +24,6 @@ void loadGame(char *filename);
 void listSaveFiles();
 bool checkHealth();
 int mainMenu();
+void executeRepair(char *noun);
 void oxygenControl();
 #endif
