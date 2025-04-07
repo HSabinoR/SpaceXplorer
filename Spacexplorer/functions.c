@@ -39,7 +39,7 @@ void executeScan(char *noun) {
             printf("  >  "); // Out of bounds
          } else if (x == player_info.current_loc.x && y == player_info.current_loc.y) {
             printf("  x  "); // Player's position
-         } else if (cell[x][y].has_scrap) {
+         } else if (cell[y][x].has_scrap) {
             printf(" [#] "); // Scrap detected
          } else if (x == asteroid.x && y == asteroid.y) {
             if (!printa("  A  ")) {
@@ -54,7 +54,7 @@ void executeScan(char *noun) {
    int x = player_info.current_loc.x;
    int y = player_info.current_loc.y;
 
-   if (cell[x][y].has_scrap == 1) {
+   if (cell[y][x].has_scrap == 1) {
       printf("\nThe cell you're on has some space junk!");
    }
 
@@ -211,7 +211,7 @@ void executeShow(char *noun) {
                      printf("  x  ");
                   } else if (x == asteroid.x && y == asteroid.y){
                      printf("  A  ");
-                  } else if (cell[x][y].has_scrap == 1) {
+                  } else if (cell[y][x].has_scrap == 1) {
                      printf(" [#] ");
                   } else {
                      printf(" [0] ");
@@ -265,10 +265,10 @@ void executeShow(char *noun) {
 
 void executeCollect() {
    
-   if(cell[player_info.current_loc.x][player_info.current_loc.y].has_scrap == 1) {
+   if(cell[player_info.current_loc.y][player_info.current_loc.x].has_scrap == 1) {
    
       player_info.num_scrap += 1+(rand() % 6);
-      cell[player_info.current_loc.x][player_info.current_loc.y].has_scrap = 0;
+      cell[player_info.current_loc.y][player_info.current_loc.x].has_scrap = 0;
       printf("Collecting scrap...\nScrap collected!");
       turn++;
       updateAsteroidPosition();
@@ -303,8 +303,8 @@ void saveGame() {
    fprintf(file, "%d %d\n", asteroid.x, asteroid.y);
    
    // Save cell data
-   for (int y = 0; y < n; y++) {
-      for (int x = 0; x < n; x++) {
+   for (int x = 0; x < n; x++) {
+      for (int y = 0; y < n; y++) {
          fprintf(file, "%d ", cell[y][x].has_scrap);
       }
       fprintf(file, "\n");
@@ -344,7 +344,7 @@ void loadGame(char *filename) {
    for (int y = 0; y < n; y++) {
       for (int x = 0; x < n; x++) {
          if (fscanf(file, "%d ", &cell[y][x].has_scrap) == 1) {
-            printa("Loaded cell[%d][%d] data...\n", y, x); // Debugging
+            printa("Loaded cell[%d][%d] data[%d]...\n", x, y, cell[y][x].has_scrap); // Debugging
          }
       }
    }
@@ -464,8 +464,8 @@ int mainMenu(){
             printf("|");
 
             for(int x = 0; x < n; x++){ 
-               cell[x][y].has_scrap = 0;
-               cell[x][y].has_scrap = (rand() % 10 < 4) ? 1 : 0; // 40% to add scrap
+               cell[y][x].has_scrap = 0;
+               cell[y][x].has_scrap = (rand() % 10 < 4) ? 1 : 0; // 40% to add scrap
 
                if (x == player_info.current_loc.x && y == player_info.current_loc.y){
                   printf("  x  ");
@@ -679,6 +679,22 @@ bool executecommand(char *input) {
    }
    printf("\n\t>TURN %d<\n", turn);
    printf("Type \"help\" to see all the commands.\n\n");
+   
+   int count = 0;
+   for(int y = 0; y < n; y++){
+      for(int x = 0; x < n; x++){ 
+         if (cell[y][x].has_scrap == 0) {
+            count++;
+         }
+      }
+   }
+
+   printa("Count: %d\nGrid Size: %dx%d = %d\n\n", count, n, n, n*n);
+
+   if (count == n*n) {
+      printf("\t!!WELL DONE!!\nYou've collected all possible scrap and survived with %d scrap remaining!!\n", player_info.num_scrap);
+      return false;
+   }
 
    oxygenControl();
    return checkHealth();
