@@ -85,22 +85,22 @@ void executeFly(char *noun) {
       if (strcmp(noun, "up") == 0 && player_info.current_loc.y > 0){
          player_info.current_loc.y -= 1;
          printf("Flying upwards...\n");
-         printa("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
+         printa("New Co-ordinates: x: %d y: %d\n", player_info.current_loc.x, player_info.current_loc.y);
          turn++;
       } else if (strcmp(noun, "down") == 0 && player_info.current_loc.y < n-1){
          player_info.current_loc.y += 1;
          printf("Flying downwards...\n");
-         printa("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
+         printa("New Co-ordinates: x: %d y: %d\n", player_info.current_loc.x, player_info.current_loc.y);
          turn++;
       } else if (strcmp(noun, "left") == 0 && player_info.current_loc.x > 0){
          player_info.current_loc.x -= 1;
          printf("Flying left...\n");
-         printa("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
+         printa("New Co-ordinates: x: %d y: %d\n", player_info.current_loc.x, player_info.current_loc.y);
          turn++;
       } else if (strcmp(noun, "right") == 0 && player_info.current_loc.x < n-1){
          player_info.current_loc.x += 1;
          printf("Flying right...\n");
-         printa("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
+         printa("New Co-ordinates: x: %d y: %d\n", player_info.current_loc.x, player_info.current_loc.y);
          turn++;
       } else{
          printf("Can't fly in that direction");
@@ -109,7 +109,7 @@ void executeFly(char *noun) {
 
       if (cell[player_info.current_loc.x][player_info.current_loc.y].has_scrap == 1){
          int chance = rand() % 10; // Random chance of taking damage if the cell has scrap
-         printa("Chance value: %d\n", chance); //Debugging
+         printa("Chance to get hit value: %d\n", chance); //Debugging
 
          if(chance > 5 && chance < 11){
             player_info.hp -= 1+rand() % 10;
@@ -194,6 +194,40 @@ void updateAsteroidPosition() { //Asteroid flies in a predefined path
 void executeShow(char *noun) {
    if(noun != NULL){
       if (strcmp(noun, "map") == 0){
+         
+         if (printa("Scrap Map\n")) {
+            printf(" ");
+            for(int i = 0; i < n*5; i++){
+               printf("_");
+            }
+            printf("\n");
+
+            for(int y = 0; y < n; y++){
+         
+               printf("|");
+
+               for(int x = 0; x < n; x++){             
+                  if (x == player_info.current_loc.x && y == player_info.current_loc.y){
+                     printf("  x  ");
+                  } else if (x == asteroid.x && y == asteroid.y){
+                     printf("  A  ");
+                  } else if (cell[x][y].has_scrap == 1) {
+                     printf(" [#] ");
+                  } else {
+                     printf(" [0] ");
+                  }
+               }
+               printf("|\n");
+            }
+
+            printf(" ");
+            for(int i = 0; i < n*5; i++){
+               printf("_");
+            }
+            printf("\n");
+            return;
+         }
+         
          printf(" ");
          for(int i = 0; i < n*5; i++){
             printf("_");
@@ -219,7 +253,7 @@ void executeShow(char *noun) {
          }
 
          printf(" ");
-         for(int i = 0; i < n*5; i++){
+         for (int i = 0; i < n*5; i++){
             printf("_");
          }
          printf("\n");
@@ -233,7 +267,7 @@ void executeCollect() {
    
    if(cell[player_info.current_loc.x][player_info.current_loc.y].has_scrap == 1) {
    
-      player_info.num_scrap += 1;
+      player_info.num_scrap += 1+(rand() % 6);
       cell[player_info.current_loc.x][player_info.current_loc.y].has_scrap = 0;
       printf("Collecting scrap...\nScrap collected!");
       turn++;
@@ -342,7 +376,7 @@ bool checkHealth(){
    } else if(player_info.hp <= 0){
       printf("\nYour ship has taken too much damage!! \n\t!!GAME OVER!!\n");
       return false;
-   } else if(player_info.oxygen = 0) {
+   } else if(player_info.oxygen == 0) {
       printf("\nYour ship has ran out of oxygen! You have suffocated and died!! \n\t!!GAME OVER!!\n");
       return false;
    }
@@ -403,6 +437,9 @@ int mainMenu(){
          // Set the initial position of the player
          player_info.current_loc.x = rand() % n;
          player_info.current_loc.y = rand() % n;
+
+         printa("Initialized Oxygen: %d\n", player_info.oxygen);
+         printa("Initialized HP: %d\n", player_info.hp);
       
          asteroid.x = rand() % n;
          asteroid.y = rand() % n;
@@ -428,7 +465,7 @@ int mainMenu(){
 
             for(int x = 0; x < n; x++){ 
                cell[x][y].has_scrap = 0;
-               cell[x][y].has_scrap = (rand() % 4 < 3) ? 1 : 0; // 75% to add scrap
+               cell[x][y].has_scrap = (rand() % 10 < 4) ? 1 : 0; // 40% to add scrap
 
                if (x == player_info.current_loc.x && y == player_info.current_loc.y){
                   printf("  x  ");
@@ -585,7 +622,10 @@ void oxygenControl(){
       player_info.oxygen -= 6;
    }
 
-   if (player_info.oxygen < 0) player_info.oxygen = 0;
+   if (player_info.oxygen < 0) {
+      player_info.oxygen = 0;
+      printa("Setting player oxygen to %d", player_info.oxygen);
+   }
 }
 
 bool printa(const char *format, ...) {
