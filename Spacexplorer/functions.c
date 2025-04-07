@@ -496,8 +496,8 @@ int mainMenu(){
 
          FILE *file = NULL;
          while (file == NULL) {
-            printf("Type \"cancel\" to go back.\n");
-            printf("Which file would you like to load (include the .txt): ");
+            printf("\nType \"cancel\" to go back.\n");
+            printf("Which file would you like to load: ");
             fgets(filename, sizeof filename, stdin);
             
             // Remove trailing newline, if any
@@ -506,13 +506,15 @@ int mainMenu(){
                filename[len - 1] = '\0';
             }  
 
+            snprintf(filename, sizeof(filename), "%s.txt", filename);
+
             if (strcmp(filename, "cancel") == 0){
                break;
             }
       
             file = fopen(filename, "r");
             if (file == NULL) {
-               printf("File not found. Please enter a valid filename.\n");
+               printf("File %s not found. Please enter a valid filename.\n", filename);
             }
          }
 

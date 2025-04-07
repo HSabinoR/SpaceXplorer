@@ -1,7 +1,7 @@
 /*
 The following commands need to be used in order to run:
-1. gcc main.c structures.c functions.c -o main.exe
-2. .\main.exe
+1. gcc main.c structures.c functions.c -o SpaceXplorer.exe
+2. .\SpaceXplorer.exe
 */
 
 #include <stdio.h>
