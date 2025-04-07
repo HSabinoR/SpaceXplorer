@@ -7,7 +7,9 @@
 #include <dirent.h>
 #include "structures.h"
 #include "functions.h"
+#include <stdarg.h>
 
+bool admin = false;
 
 void executeScan(char *noun) {
    Coord scannable_cells[3][3] = {
@@ -40,7 +42,9 @@ void executeScan(char *noun) {
          } else if (cell[x][y].has_scrap) {
             printf(" [#] "); // Scrap detected
          } else if (x == asteroid.x && y == asteroid.y) {
-            printf("  A  "); // Asteroid detected
+            if (!printa("  A  ")) {
+               printf(" [0] ");
+            }
         } else {
             printf(" [0] "); // Empty cell
          }
@@ -54,6 +58,7 @@ void executeScan(char *noun) {
       printf("\nThe cell you're on has some space junk!");
    }
 
+   updateAsteroidPosition();
    turn++;
 }
 
@@ -70,30 +75,32 @@ void executeFly(char *noun) {
       { {player_info.current_loc.x - 4, player_info.current_loc.y + 2}, {player_info.current_loc.x - 3, player_info.current_loc.y + 2}, {player_info.current_loc.x - 2, player_info.current_loc.y + 2}, {player_info.current_loc.x - 1, player_info.current_loc.y + 2}, {player_info.current_loc.x, player_info.current_loc.y + 2}, {player_info.current_loc.x + 1, player_info.current_loc.y + 2}, {player_info.current_loc.x + 2, player_info.current_loc.y + 2}, {player_info.current_loc.x + 3, player_info.current_loc.y + 2}, {player_info.current_loc.x + 4, player_info.current_loc.y + 2} },
       { {player_info.current_loc.x - 4, player_info.current_loc.y + 3}, {player_info.current_loc.x - 3, player_info.current_loc.y + 3}, {player_info.current_loc.x - 2, player_info.current_loc.y + 3}, {player_info.current_loc.x - 1, player_info.current_loc.y + 3}, {player_info.current_loc.x, player_info.current_loc.y + 3}, {player_info.current_loc.x + 1, player_info.current_loc.y + 3}, {player_info.current_loc.x + 2, player_info.current_loc.y + 3}, {player_info.current_loc.x + 3, player_info.current_loc.y + 3}, {player_info.current_loc.x + 4, player_info.current_loc.y + 3} },
       { {player_info.current_loc.x - 4, player_info.current_loc.y + 4}, {player_info.current_loc.x - 3, player_info.current_loc.y + 4}, {player_info.current_loc.x - 2, player_info.current_loc.y + 4}, {player_info.current_loc.x - 1, player_info.current_loc.y + 4}, {player_info.current_loc.x, player_info.current_loc.y + 4}, {player_info.current_loc.x + 1, player_info.current_loc.y + 4}, {player_info.current_loc.x + 2, player_info.current_loc.y + 4}, {player_info.current_loc.x + 3, player_info.current_loc.y + 4}, {player_info.current_loc.x + 4, player_info.current_loc.y + 4} }
-  };
+   };
 
    srand(time(NULL));
+
+   updateAsteroidPosition();
 
    if(noun != NULL) {
       if (strcmp(noun, "up") == 0 && player_info.current_loc.y > 0){
          player_info.current_loc.y -= 1;
          printf("Flying upwards...\n");
-         printf("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
+         printa("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
          turn++;
       } else if (strcmp(noun, "down") == 0 && player_info.current_loc.y < n-1){
          player_info.current_loc.y += 1;
          printf("Flying downwards...\n");
-         printf("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
+         printa("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
          turn++;
       } else if (strcmp(noun, "left") == 0 && player_info.current_loc.x > 0){
          player_info.current_loc.x -= 1;
          printf("Flying left...\n");
-         printf("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
+         printa("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
          turn++;
       } else if (strcmp(noun, "right") == 0 && player_info.current_loc.x < n-1){
          player_info.current_loc.x += 1;
          printf("Flying right...\n");
-         printf("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
+         printa("New Co-ordinates: x: %d y: %d", player_info.current_loc.x, player_info.current_loc.y);
          turn++;
       } else{
          printf("Can't fly in that direction");
@@ -102,7 +109,7 @@ void executeFly(char *noun) {
 
       if (cell[player_info.current_loc.x][player_info.current_loc.y].has_scrap == 1){
          int chance = rand() % 10; // Random chance of taking damage if the cell has scrap
-         //printf("Chance value: %d\n", chance); Debugging
+         printa("Chance value: %d\n", chance); //Debugging
 
          if(chance > 5 && chance < 11){
             player_info.hp -= 1+rand() % 10;
@@ -114,7 +121,6 @@ void executeFly(char *noun) {
       printf("No direction specified!");
       return;
    }
-   updateAsteroidPosition();
 
    // Asteroid Detection
    for(int i = 0; i < 9; i++) {
@@ -122,7 +128,7 @@ void executeFly(char *noun) {
          int x = scannable_cells[i][j].x;
          int y = scannable_cells[i][j].y;
 
-         if(asteroid.x == x && asteroid.y == y) printf("\nAsteroid detected within 4 spaces. Unable to determine from what direction...\nKeep an eye out!");
+         if(asteroid.x == x && asteroid.y == y) printf("\nAsteroid detected within 4 spaces. Unable to determine from what direction...\nKeep an eye out!\n");
       }
    }
 }
@@ -201,9 +207,11 @@ void executeShow(char *noun) {
             for(int x = 0; x < n; x++){             
                if (x == player_info.current_loc.x && y == player_info.current_loc.y){
                   printf("  x  ");
-               } /*else if (x == asteroid.x && y == asteroid.y){
-                  printf("  A  ");
-               }*/ else {
+               } else if (x == asteroid.x && y == asteroid.y){
+                  if (!printa("  A  ")) {
+                     printf(" [0] ");
+                  }
+               } else {
                   printf(" [0] ");
                }
             }
@@ -215,10 +223,8 @@ void executeShow(char *noun) {
             printf("_");
          }
          printf("\n");
-         turn++;
       } else if(strcmp(noun, "data") == 0){
          print_player(&player_info);
-         turn++;
       }
    }
 }
@@ -231,6 +237,7 @@ void executeCollect() {
       cell[player_info.current_loc.x][player_info.current_loc.y].has_scrap = 0;
       printf("Collecting scrap...\nScrap collected!");
       turn++;
+      updateAsteroidPosition();
    } else {
       printf("No scrap to collect!");
    }
@@ -277,11 +284,11 @@ void loadGame(char *filename) {
 
    // Load player info, including player's name
    fscanf(file, "%d %14s\n%d %d %d %d %d %d", &turn, &player_info.name, &player_info.current_loc.x, &player_info.current_loc.y, &player_info.hp, &player_info.num_scrap, &player_info.oxygen, &n);
-   printf("Loaded player details...\n");
+   printa("Loaded player details...\n");
 
    // Load asteroid Coords
    fscanf(file, "%d %d", &asteroid.x, &asteroid.y);
-   printf("Loaded asteroid coords...\n");
+   printa("Loaded asteroid coords...\n");
 
    cell = malloc(n * sizeof(Cell*));
    for (int i = 0; i < n; i++) {
@@ -292,7 +299,7 @@ void loadGame(char *filename) {
    for (int y = 0; y < n; y++) {
       for (int x = 0; x < n; x++) {
          fscanf(file, "%d ", &cell[y][x].has_scrap);
-         //printf("Loaded cell[%d][%d] data...\n", y, x); // Debugging
+         printf("Loaded cell[%d][%d] data...\n", y, x); // Debugging
       }
    }
 
@@ -339,6 +346,7 @@ int mainMenu(){
          printf(" 1. New Game\n");
          printf(" 2. Load Game\n");
          printf(" 3. Quit\n");
+         printa("Debugging Mode: on\n");
          getInput();
 
          char *ch = strtok(command, " \n");
@@ -346,12 +354,12 @@ int mainMenu(){
          if (ch != NULL) {
             long num = strtol(ch, &endptr, 10);
            
-            if (*endptr == '\0' && num > 0 && num < 4) {
+            if (*endptr == '\0' && num > 0 && num < 5) {
                choice = (int) num;
-               //printf("Choice: %d\n", num); // Debugging
+               printa("Choice: %d\n", num); // Debugging
             }
          }
-      } while(choice != 1 && choice != 2 && choice != 3);
+      } while(choice != 1 && choice != 2 && choice != 3 && choice != 4);
    
       if(choice == 1){
          printf("\nPlayer Name: ");
@@ -366,7 +374,7 @@ int mainMenu(){
          system("cls");
 
          n = MIN_GRID_SIZE + rand() % (MAX_GRID_SIZE - MIN_GRID_SIZE + 1); // Random number between 18 and 24 determining grid size
-         //printf("Initialized grid size\n"); // Debugging
+         printa("Initialized grid size\n");
          
          // Set the initial position of the player
          player_info.current_loc.x = rand() % n;
@@ -400,9 +408,11 @@ int mainMenu(){
 
                if (x == player_info.current_loc.x && y == player_info.current_loc.y){
                   printf("  x  ");
-               } /*else if (x == asteroid.x && y == asteroid.y){
-                  //printf("  A  ");
-               }*/ else {
+               } else if (x == asteroid.x && y == asteroid.y){
+                  if(!printa("  A  ")) {
+                     printf(" [0] ");
+                  }
+               } else {
                   printf(" [0] ");
                }
             }
@@ -425,6 +435,7 @@ int mainMenu(){
 
          FILE *file = NULL;
          while (file == NULL) {
+            printf("Type \"cancel\" to go back.\n");
             printf("Which file would you like to load (include the .txt): ");
             fgets(filename, sizeof filename, stdin);
             
@@ -466,9 +477,11 @@ int mainMenu(){
                for(int x = 0; x < n; x++){
                   if (x == player_info.current_loc.x && y == player_info.current_loc.y){
                      printf("  x  ");
-                  } /*else if (x == asteroid.x && y == asteroid.y){
-                     //printf("  A  ");
-                  }*/ else {
+                  } else if (x == asteroid.x && y == asteroid.y){
+                     if (!printa("  A  ")) {
+                        printf(" [0] ");
+                     }
+                  } else {
                      printf(" [0] ");
                   }
                }
@@ -485,6 +498,9 @@ int mainMenu(){
       } else if(choice == 3) {
          running = false; 
          return 0;
+      } else if(choice == 4) { 
+         admin = true;
+         running = true;
       }
    }
 }
@@ -528,6 +544,7 @@ void executeRepair(char *noun) {
       printf("You repaired %d HP using %d scrap.\n", actual_used, actual_used);
       printf("Current HP: %d, Scrap remaining: %d\n", player_info.hp, player_info.num_scrap);
       turn++;
+      updateAsteroidPosition();
    } else {
       printf("Usage: repair <amount>\n");
    }
@@ -543,6 +560,17 @@ void oxygenControl(){
    } else if(player_info.hp < 25 && player_info.hp >= 1) {
       player_info.oxygen -= 8;
    }
+}
+
+bool printa(const char *format, ...) {
+   if (admin) {
+       va_list args; 
+       va_start(args, format);
+       vprintf(format, args); // behaves like printf but takes va_list
+       va_end(args);
+   }
+
+   return admin;
 }
 
 bool executecommand(char *input) {

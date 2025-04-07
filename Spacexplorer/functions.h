@@ -26,4 +26,5 @@ bool checkHealth();
 int mainMenu();
 void executeRepair(char *noun);
 void oxygenControl();
+bool printa(const char *format, ...);
 #endif
