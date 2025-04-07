@@ -244,23 +244,27 @@ void executeCollect() {
 }
 
 void saveGame() {
+
+   // Filename is created based on the players name
    char filename[30];
    snprintf(filename, sizeof(filename), "%s.txt", player_info.name);
    
+   // Replace any invalid characters in the filename with underscores
    for (int i = 0; filename[i] != '\0'; i++) {
       if (!isalnum((unsigned char)filename[i]) && filename[i] != '.') {
-         filename[i] = '_'; // Replace invalid characters with underscore
+         filename[i] = '_';
       }
    }
 
+   // Open .txt file for writing
    FILE *file = fopen(filename, "w");
    if (file == NULL) {
       perror("Failed to open file for writing");
       return;
    }
 
-   // Save player info, including player's name
-   fprintf(file, "%d %s\n%d %d %d %d %d %d\n", turn, player_info.name, player_info.current_loc.x, player_info.current_loc.y, player_info.hp, player_info.num_scrap, player_info.oxygen, n);
+   // Save player info
+   fprintf(file, "%d\n%s\n%d %d %d %d %d %d\n", turn, player_info.name, player_info.current_loc.x, player_info.current_loc.y, player_info.hp, player_info.num_scrap, player_info.oxygen, n);
    // Save asteroid Coords
    fprintf(file, "%d %d\n", asteroid.x, asteroid.y);
    
@@ -276,19 +280,26 @@ void saveGame() {
 }
 
 void loadGame(char *filename) {
+   // Open the "filename.txt" file for reading
    FILE *file = fopen(filename, "r");
    if (file == NULL) {
       perror("Failed to open file for reading");
       return;
+   } else {
+      printa("Opening file: %s\n", filename);
    }
 
    // Load player info, including player's name
-   fscanf(file, "%d %14s\n%d %d %d %d %d %d", &turn, &player_info.name, &player_info.current_loc.x, &player_info.current_loc.y, &player_info.hp, &player_info.num_scrap, &player_info.oxygen, &n);
-   printa("Loaded player details...\n");
+   if (fscanf(file, "%d\n%14s\n%d %d %d %d %d %d", &turn, &player_info.name, &player_info.current_loc.x, &player_info.current_loc.y, &player_info.hp, &player_info.num_scrap, &player_info.oxygen, &n) == 8) {
+      printa("Loaded player details...\n");
+   } else{
+      printa("Failed to load player details...\n");
+   }
 
    // Load asteroid Coords
-   fscanf(file, "%d %d", &asteroid.x, &asteroid.y);
-   printa("Loaded asteroid coords...\n");
+   if (fscanf(file, "%d %d", &asteroid.x, &asteroid.y) == 2) {
+      printa("Loaded asteroid coords...\n");
+   }
 
    cell = malloc(n * sizeof(Cell*));
    for (int i = 0; i < n; i++) {
@@ -298,8 +309,9 @@ void loadGame(char *filename) {
    // Load cell data
    for (int y = 0; y < n; y++) {
       for (int x = 0; x < n; x++) {
-         fscanf(file, "%d ", &cell[y][x].has_scrap);
-         printf("Loaded cell[%d][%d] data...\n", y, x); // Debugging
+         if (fscanf(file, "%d ", &cell[y][x].has_scrap) == 1) {
+            printa("Loaded cell[%d][%d] data...\n", y, x); // Debugging
+         }
       }
    }
 
@@ -362,7 +374,7 @@ int mainMenu(){
       } while(choice != 1 && choice != 2 && choice != 3 && choice != 4);
    
       if(choice == 1){
-         printf("\nPlayer Name: ");
+         printf("\nPlayer Name (no spaces allowed): ");
          fgets(player_info.name, sizeof player_info.name, stdin);
          
          // Removes any newline(\n) characters from the name.
@@ -370,6 +382,15 @@ int mainMenu(){
          if (len > 0 && player_info.name[len - 1] == '\n') {
             player_info.name[len - 1] = '\0';
          }
+
+         // Remove any spaces from the name
+         int j = 0;
+         for (int i = 0; player_info.name[i] != '\0'; i++) {
+            if (player_info.name[i] != ' ') {
+               player_info.name[j++] = player_info.name[i];
+            }
+         }
+         player_info.name[j] = '\0'; // Null-terminate the modified string
 
          system("cls");
 
@@ -404,7 +425,7 @@ int mainMenu(){
 
             for(int x = 0; x < n; x++){ 
                cell[x][y].has_scrap = 0;
-               cell[x][y].has_scrap = rand() % 2; // Randomly add scrap
+               cell[x][y].has_scrap = (rand() % 4 < 3) ? 1 : 0; // 75% to add scrap
 
                if (x == player_info.current_loc.x && y == player_info.current_loc.y){
                   printf("  x  ");
@@ -552,13 +573,13 @@ void executeRepair(char *noun) {
 
 void oxygenControl(){
    if(player_info.hp < 100 && player_info.hp >= 75) {
-      player_info.oxygen -= 2;
+      player_info.oxygen -= 1;
    } else if(player_info.hp < 75 && player_info.hp >= 50) {
-      player_info.oxygen -= 4;
+      player_info.oxygen -= 2;
    } else if(player_info.hp < 50 && player_info.hp >= 25) {
-      player_info.oxygen -= 6;
+      player_info.oxygen -= 4;
    } else if(player_info.hp < 25 && player_info.hp >= 1) {
-      player_info.oxygen -= 8;
+      player_info.oxygen -= 6;
    }
 }
 
