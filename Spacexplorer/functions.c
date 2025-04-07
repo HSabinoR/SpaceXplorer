@@ -336,11 +336,14 @@ void listSaveFiles() {
 }
 
 bool checkHealth(){
-   if(asteroid.x == player_info.current_loc.x && asteroid.y == player_info.current_loc.y){
+   if (asteroid.x == player_info.current_loc.x && asteroid.y == player_info.current_loc.y){
       printf("\nYou have hit an asteroid!! \n\t!!GAME OVER!!\n");
       return false;
-   }else if(player_info.hp <= 0){
+   } else if(player_info.hp <= 0){
       printf("\nYour ship has taken too much damage!! \n\t!!GAME OVER!!\n");
+      return false;
+   } else if(player_info.oxygen = 0) {
+      printf("\nYour ship has ran out of oxygen! You have suffocated and died!! \n\t!!GAME OVER!!\n");
       return false;
    }
    return true;
@@ -581,6 +584,8 @@ void oxygenControl(){
    } else if(player_info.hp < 25 && player_info.hp >= 1) {
       player_info.oxygen -= 6;
    }
+
+   if (player_info.oxygen < 0) player_info.oxygen = 0;
 }
 
 bool printa(const char *format, ...) {
