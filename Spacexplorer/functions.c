@@ -57,8 +57,6 @@ void executeScan(char *noun) {
    if (cell[y][x].has_scrap == 1) {
       printf("\nThe cell you're on has some space junk!");
    }
-
-   updateAsteroidPosition();
    turn++;
 }
 
@@ -176,7 +174,7 @@ void updateAsteroidPosition() { //Asteroid flies in a predefined path
       {1, 0}, {1, 0}, {0, -1}, {0, -1}, {1, 0}, {1, 0}, {0, 1}, {0, 1},     // Move right twice, up twice, right twice, down twice
       {-1, 0}, {-1, 0}, {0, -1}, {0, -1}, {1, 0}, {0, 1}, {-1, 0}, {0, 1},  // Move left twice, up twice, right once, down once, left once, down once
       {1, 0}, {0, -1}, {1, 0}, {0, 1}, {-1, 0}, {0, -1}, {-1, 0}, {0, 1}    // Move right once, up once, right once, down once, left twice, up once
-  };
+   };
    int path_length = sizeof(predefined_path) / sizeof(predefined_path[0]);
 
    asteroid.x += predefined_path[step].x;
@@ -271,7 +269,6 @@ void executeCollect() {
       cell[player_info.current_loc.y][player_info.current_loc.x].has_scrap = 0;
       printf("Collecting scrap...\nScrap collected!");
       turn++;
-      updateAsteroidPosition();
    } else {
       printf("No scrap to collect!");
    }
@@ -303,8 +300,8 @@ void saveGame() {
    fprintf(file, "%d %d\n", asteroid.x, asteroid.y);
    
    // Save cell data
-   for (int x = 0; x < n; x++) {
-      for (int y = 0; y < n; y++) {
+   for (int y = 0; y < n; y++) {
+      for (int x = 0; x < n; x++) {
          fprintf(file, "%d ", cell[y][x].has_scrap);
       }
       fprintf(file, "\n");
@@ -607,7 +604,6 @@ void executeRepair(char *noun) {
       printf("You repaired %d HP using %d scrap.\n", actual_used, actual_used);
       printf("Current HP: %d, Scrap remaining: %d\n", player_info.hp, player_info.num_scrap);
       turn++;
-      updateAsteroidPosition();
    } else {
       printf("Usage: repair <amount>\n");
    }
