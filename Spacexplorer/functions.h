@@ -14,7 +14,7 @@ extern char command[50];
 int turn;
 bool getInput(void);
 bool executecommand(char *input);
-void executeScan(char *noun);
+void executeScan();
 void executeFly(char *noun);
 void executeShow(char *noun);
 void executeCollect();

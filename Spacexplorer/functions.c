@@ -11,7 +11,7 @@
 
 bool admin = false;
 
-void executeScan(char *noun) {
+void executeScan() {
    Coord scannable_cells[3][3] = {
       { {player_info.current_loc.x - 1, player_info.current_loc.y - 1}, {player_info.current_loc.x, player_info.current_loc.y - 1}, {player_info.current_loc.x + 1, player_info.current_loc.y - 1} },
       { {player_info.current_loc.x - 1, player_info.current_loc.y}, {player_info.current_loc.x, player_info.current_loc.y}, {player_info.current_loc.x + 1, player_info.current_loc.y} },
@@ -20,7 +20,7 @@ void executeScan(char *noun) {
    
    
    
-   int gridSize = 3; // Default grid size
+   int gridSize = 3; // Default grid size. 
    
    for(int i = 0; i < gridSize; i++) {
         
@@ -42,9 +42,7 @@ void executeScan(char *noun) {
          } else if (cell[y][x].has_scrap) {
             printf(" [#] "); // Scrap detected
          } else if (x == asteroid.x && y == asteroid.y) {
-            if (!printa("  A  ")) {
-               printf(" [0] ");
-            }
+            printf("  A  ");
         } else {
             printf(" [0] "); // Empty cell
          }
@@ -265,7 +263,7 @@ void executeCollect() {
    
    if(cell[player_info.current_loc.y][player_info.current_loc.x].has_scrap == 1) {
    
-      player_info.num_scrap += 1+(rand() % 6);
+      player_info.num_scrap += 1; //+ (rand() % 6); // Uncomment to increase how much scrap you can get from one cell
       cell[player_info.current_loc.y][player_info.current_loc.x].has_scrap = 0;
       printf("Collecting scrap...\nScrap collected!");
       turn++;
