@@ -501,11 +501,11 @@ int mainMenu(){
                filename[len - 1] = '\0';
             }  
 
-            snprintf(filename, sizeof(filename), "%s.txt", filename);
-
             if (strcmp(filename, "cancel") == 0){
                break;
             }
+
+            snprintf(filename, sizeof(filename), "%s.txt", filename);
       
             file = fopen(filename, "r");
             if (file == NULL) {
